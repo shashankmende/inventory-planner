@@ -76,9 +76,30 @@ export function AppProvider({ children }) {
   const recalculate = useCallback(async (config) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const result = await api.recalculate(config);
-      dispatch({ type: 'SET_RESULTS', payload: result });
-      return result;
+      const response = await api.recalculate(config);
+
+      const { config: responseConfig = {}, results = {} } = response;
+      const { productPriority = [] } = responseConfig;
+      const { products = [] } = results;
+      // dispatch({ type: 'SET_CONFIG', payload: responseConfig });
+      const backendProductMap = new Map(
+        products.map(product => [product.productCode, product])
+      );
+
+      const sortedProducts = productPriority
+        .map(({ productCode }) => backendProductMap.get(productCode))
+        .filter(Boolean);
+
+      const finalResult = {
+        config: { ...responseConfig },
+        results: {
+          ...results,
+          products: sortedProducts.length ? sortedProducts : products,
+        },
+      };
+
+        dispatch({ type: 'SET_RESULTS', payload: finalResult });
+      return finalResult;
     } catch (err) {
       dispatch({ type: 'SET_ERROR', payload: err.message });
       throw err;

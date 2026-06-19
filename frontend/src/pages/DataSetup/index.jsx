@@ -33,6 +33,7 @@ const STRATEGIES = [
 export default function DataSetup() {
   const { uploadFile, recalculate, isLoading, error, config, updateConfig, hasData, hasResults, results, validation } =
     useApp();
+  console.log("config", config);
   const navigate = useNavigate();
 
   const [file, setFile] = useState(null);
@@ -46,16 +47,17 @@ export default function DataSetup() {
   // Sync productOrder whenever results change (products detected from Excel)
   useEffect(() => {
     if (!results?.products?.length) return;
+    console.log('Syncing product order from results and config:', results, config);
     const existingPriority = config.productPriority || [];
     if (existingPriority.length > 0) {
       // Restore previously set order
-      const sorted = [...results.products].sort((a, b) => {
-        const pa = existingPriority.find((p) => p.productCode === a.productCode);
-        const pb = existingPriority.find((p) => p.productCode === b.productCode);
-        return (pa?.priority ?? 999) - (pb?.priority ?? 999);
-      });
+      // const sorted = [...results.products].sort((a, b) => {
+      //   const pa = existingPriority.find((p) => p.productCode === a.productCode);
+      //   const pb = existingPriority.find((p) => p.productCode === b.productCode);
+      //   return (pa?.priority ?? 999) - (pb?.priority ?? 999);
+      // });
       setProductOrder(
-        sorted.map((p) => ({
+        results.products.map((p) => ({
           productCode: p.productCode,
           productName: p.productName || p.productCode,
           targetQty: existingPriority.find((pp) => pp.productCode === p.productCode)?.targetQty ?? '',
@@ -151,6 +153,7 @@ export default function DataSetup() {
       navigate('/overview');
     } catch (err) {
       // error set in context
+      console.error('Recalculation failed:', err);
     }
   };
 
