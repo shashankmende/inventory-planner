@@ -2,7 +2,7 @@
 // Handles file upload, validation, calculation, and result retrieval.
 
 const { parseExcel } = require('../services/excelParser');
-const { validate } = require('../../../shared/engine/validationEngine');
+const { validate } = require('../engine/validationEngine');
 const { calculate } = require('../services/calculationService');
 
 // Simple in-process session store (replace with Redis/DB for multi-user)

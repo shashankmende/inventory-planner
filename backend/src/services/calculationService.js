@@ -1,12 +1,12 @@
 // calculationService.js
 // Orchestrates all engines to produce a full calculation result.
 
-const { filterPartsByMode, resolvePriority } = require('../../../shared/engine/capacityModes');
-const { calculateStandaloneCapacity } = require('../../../shared/engine/standaloneCapacity');
-const { runAllocation } = require('../../../shared/engine/allocationEngine');
-const { identifyBottlenecks } = require('../../../shared/engine/bottleneckEngine');
-const { calculateStockValue, resolveUnitValue } = require('../../../shared/engine/stockValueEngine');
-const { generateInsights } = require('../../../shared/engine/insightEngine');
+const { filterPartsByMode, resolvePriority } = require('../engine/capacityModes');
+const { calculateStandaloneCapacity } = require('../engine/standaloneCapacity');
+const { runAllocation } = require('../engine/allocationEngine');
+const { identifyBottlenecks } = require('../engine/bottleneckEngine');
+const { calculateStockValue, resolveUnitValue } = require('../engine/stockValueEngine');
+const { generateInsights } = require('../engine/insightEngine');
 
 function buildBomMap(bomItems) {
   const map = {};
