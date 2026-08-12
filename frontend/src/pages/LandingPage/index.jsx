@@ -44,11 +44,9 @@ export default function LandingPage() {
                 ['Main Category', '✅ Required', 'Used to auto-assign part priority (e.g. Electrical, Plastics)'],
                 ['Sub-Category', '⚪ Optional', 'Finer-grained priority mapping (e.g. Motors, Packing Material)'],
                 ['Stock', '✅ Required', 'Current quantity on hand'],
-                ['Buy Price (In Rs.)', '⚪ Optional*', 'Unit cost in INR (or source currency with Conversion Rate)'],
-                ['Stock Value', '⚪ Optional*', 'Total INR value of stock — use instead of Buy Price if available'],
-                ['Inventory Type', '⚪ Optional', 'Set to "obsolete" to flag dead stock'],
-                ['Supplier', '⚪ Optional', 'Supplier name'],
-                ['Lead Time', '⚪ Optional', 'Replenishment lead time in days'],
+                ['Buy Price (In Rs.)', '✅ Optional*', 'Unit cost in INR (or source currency with Conversion Rate)'],
+                ['Stock Value', '✅ Optional*', 'Total INR value of stock — use instead of Buy Price if available'],
+                ['Inventory Type', '✅ Optional', 'Set to "obsolete" to flag dead stock'],
                 ['PM125, STSK, … (product columns)', '✅ At least one', 'BOM quantity of this part for that product. Leave blank or 0 if not used.'],
               ].map(([col, req, desc]) => (
                 <tr key={col}>
@@ -78,12 +76,12 @@ export default function LandingPage() {
               </thead>
               <tbody>
                 <tr>
-                  {['MT-001', 'Electrical', 'Motors', 'Motor 12V', '1', '2', '500', '150', '', ''].map((v, i) => (
+                  {['MT-001', 'Electrical', 'Motors', 'Motor 12V', '1', '2', '500', '150', '75000', 'active'].map((v, i) => (
                     <td key={i} style={{ ...tdStyle, color: v === '' ? '#cbd5e1' : 'inherit' }}>{v || '—'}</td>
                   ))}
                 </tr>
                 <tr style={{ background: '#f8fafc' }}>
-                  {['PK-010', 'Packing Material', '', 'Outer Box', '1', '1', '', '300', '9000', ''].map((v, i) => (
+                  {['PK-010', 'Packing Material', '', 'Outer Box', '1', '1', '300', '300', '9000', 'active'].map((v, i) => (
                     <td key={i} style={{ ...tdStyle, color: v === '' ? '#cbd5e1' : 'inherit' }}>{v || '—'}</td>
                   ))}
                 </tr>
@@ -97,7 +95,7 @@ export default function LandingPage() {
         </div>
       </Section>
 
-      <Section title="Category → Priority mapping (auto-assigned)">
+      {/* <Section title="Category → Priority mapping (auto-assigned)">
         <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <PriorityGroup
             label="Manufacturing Critical"
@@ -118,7 +116,7 @@ export default function LandingPage() {
         <div style={{ ...noteStyle, marginTop: 12 }}>
           You can override any part's priority by adding a <strong>Priority</strong> column with values: <em>Manufacturing Critical</em>, <em>Dispatch Critical</em>, <em>Warning Only</em>, <em>Optional</em>, or <em>Substitute Available</em>.
         </div>
-      </Section>
+      </Section> */}
 
       <button
         onClick={() => navigate('/setup')}
