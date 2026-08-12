@@ -1,5 +1,6 @@
 // api.js — Frontend API client
-const BASE = 'http://localhost:4000/api';
+// const BASE = 'http://localhost:4000/api';
+const BASE = 'https://inventory-planner-api.onrender.com/api';
 
 async function request(path, options = {}) {
   const res = await fetch(`${BASE}${path}`, options);

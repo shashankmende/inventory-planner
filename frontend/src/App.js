@@ -4,7 +4,8 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 function Home() {
   const [apiStatus, setApiStatus] = React.useState('');
   React.useEffect(() => {
-    fetch('http://localhost:4000/health')
+    // fetch('http://localhost:4000/health')
+    fetch('https://inventory-planner-api.onrender.com/health')
       .then(res => res.json())
       .then(data => setApiStatus(data.status))
       .catch(() => setApiStatus('API not reachable'));
