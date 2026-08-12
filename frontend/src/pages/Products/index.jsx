@@ -13,7 +13,7 @@ export default function Products() {
     return <NoData onSetup={() => navigate('/setup')} />;
   }
 
-  const { products, kpis } = results;
+  const { products, kpis, parts, bomItems } = results;
 
   return (
     <div style={{ maxWidth: 1100 }}>
@@ -42,7 +42,7 @@ export default function Products() {
       </div>
 
       {tab === 'capacity'
-        ? <CapacityTab products={products} />
+        ? <CapacityTab products={products} parts={parts} bomItems={bomItems} />
         : <DistributionTab results={results} />
       }
     </div>
@@ -50,13 +50,38 @@ export default function Products() {
 }
 
 /* ── Tab 1: Capacity Allocation ───────────────────────────────────── */
-function CapacityTab({ products }) {
+function CapacityTab({ products, parts, bomItems }) {
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [detailProduct, setDetailProduct] = useState(null);
 
   const classifications = ['all', 'High', 'Medium', 'Low', 'Blocked'];
+
+  const stockMap = useMemo(() => {
+    return Object.fromEntries(parts.map((part) => [part.materialCode, part.stock ?? 0]));
+  }, [parts]);
+
+  const productLimitingMap = useMemo(() => {
+    const activeSet = new Set(parts.filter((part) => part.isActive).map((part) => part.materialCode));
+    const map = {};
+    for (const prod of products) {
+      const productBom = bomItems
+        .filter((item) => item.productCode === prod.productCode && activeSet.has(item.materialCode))
+        .map((item) => ({
+          materialCode: item.materialCode,
+          materialName: parts.find((p) => p.materialCode === item.materialCode)?.materialName || item.materialCode,
+          bomQty: item.bomQty,
+          stock: stockMap[item.materialCode] ?? 0,
+          possible: item.bomQty > 0 ? Math.floor((stockMap[item.materialCode] ?? 0) / item.bomQty) : 0,
+        }))
+        .sort((a, b) => a.possible - b.possible || a.materialCode.localeCompare(b.materialCode));
+      map[prod.productCode] = productBom;
+    }
+    return map;
+  }, [products, bomItems, parts, stockMap]);
+
   const filtered = products.filter((p) => {
     const matchClass = filter === 'all' || p.classification === filter;
     const q = search.toLowerCase();
@@ -105,7 +130,19 @@ function CapacityTab({ products }) {
                 <td style={td}>{p.contributionPct.toFixed(1)}%</td>
                 <td style={td}><ClassBadge cls={p.classification} /></td>
                 <td style={{ ...td, fontSize: 12, color: '#64748b' }}>
-                  {p.limitingParts?.map((lp) => `${lp.materialName || lp.materialCode} (${lp.possible})`).join(', ') || '—'}
+                  {productLimitingMap[p.productCode]?.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => setDetailProduct(p.productCode)}
+                      style={{
+                        background: 'none', border: 'none', color: '#2563eb', cursor: 'pointer', padding: 0,
+                        textAlign: 'left', fontSize: 12, textDecoration: 'underline', fontWeight: 600,
+                      }}
+                    >
+                      {`${productLimitingMap[p.productCode][0].materialName} (${productLimitingMap[p.productCode][0].possible})`}
+                      {productLimitingMap[p.productCode].length > 1 ? ` + ${productLimitingMap[p.productCode].length - 1} more` : ''}
+                    </button>
+                  ) : '—'}
                 </td>
               </tr>
             ))
@@ -119,6 +156,44 @@ function CapacityTab({ products }) {
       <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 4 }}>
         Allocated capacity is the only reliable total. Standalone values are for comparison only.
       </p>
+
+      {detailProduct && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.36)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16 }}>
+          <div style={{ width: 'min(720px, 100%)', maxHeight: '90vh', overflow: 'auto', background: '#fff', borderRadius: 16, boxShadow: '0 20px 45px rgba(15,23,42,0.24)', padding: 24, position: 'relative' }}>
+            <button type="button" onClick={() => setDetailProduct(null)}
+              style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: '#475569', cursor: 'pointer', fontSize: 18, fontWeight: 700 }}>
+              ×
+            </button>
+            <h2 style={{ margin: 0, fontSize: 18, marginBottom: 12 }}>Limiting parts for {detailProduct}</h2>
+            <p style={{ margin: '0 0 16px', color: '#475569', fontSize: 13 }}>
+              Showing the top 5 most limiting active BOM parts for this product.
+            </p>
+            <table style={{ ...tableStyle, minWidth: 0 }}>
+              <thead>
+                <tr>
+                  {['#', 'Part', 'Stock', 'BOM Qty', 'Possible'].map((h) => (
+                    <th key={h} style={th}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {(productLimitingMap[detailProduct] || []).slice(0, 5).map((item, index) => (
+                  <tr key={item.materialCode} style={{ background: index % 2 ? '#f8fafc' : '#fff' }}>
+                    <td style={td}>{index + 1}</td>
+                    <td style={td}><strong>{item.materialName}</strong><br /><span style={{ color: '#64748b', fontSize: 12 }}>{item.materialCode}</span></td>
+                    <td style={td}>{item.stock}</td>
+                    <td style={td}>{item.bomQty}</td>
+                    <td style={td}>{item.possible}</td>
+                  </tr>
+                ))}
+                {productLimitingMap[detailProduct]?.length === 0 && (
+                  <tr><td colSpan={5} style={{ ...td, textAlign: 'center', color: '#64748b', padding: 20 }}>No active limiting parts found.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </>
   );
 }

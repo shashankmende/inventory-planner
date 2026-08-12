@@ -74,6 +74,11 @@ export default function Overview() {
       .sort((a, b) => b.pctOfUsed - a.pctOfUsed);
   }, [products, parts, stockValue, bomItems]);
 
+  const productValueMap = React.useMemo(
+    () => Object.fromEntries(productValueBreakdown.map((item) => [item.productCode, item])),
+    [productValueBreakdown]
+  );
+
   if (!hasResults) {
     return <NoData onSetup={() => navigate('/setup')} />;
   }
@@ -141,28 +146,32 @@ export default function Overview() {
         <table style={tableStyle}>
           <thead>
             <tr>
-              {['Product', 'Allocated', 'Standalone', 'Allocation Gap', 'Target', 'Target Gap', 'Contribution', 'Classification'].map(h => (
+              {['Product', 'Allocated', 'Standalone', 'Allocation Gap', 'Target', 'Target Gap', 'Value Used', 'Contribution', 'Classification'].map(h => (
                 <th key={h} style={th}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {products.map((p, i) => (
-              <tr key={p.productCode} style={{ background: i % 2 ? '#f8fafc' : '#fff' }}>
-                <td style={td}><strong>{p.productCode}</strong><br /><span style={{ color: '#64748b', fontSize: 12 }}>{p.productName}</span></td>
-                <td style={{ ...td, fontWeight: 700, color: '#3b82f6' }}>{p.allocatedCapacity}</td>
-                <td style={{ ...td, color: '#64748b' }}>{p.standaloneCapacity}</td>
-                <td style={{ ...td, color: p.gap > 0 ? '#dc2626' : '#16a34a' }}>
-                  {p.gap > 0 ? `-${p.gap}` : '0'}
-                </td>
-                <td style={{ ...td, color: '#64748b' }}>{p.targetQty != null ? p.targetQty : '—'}</td>
-                <td style={{ ...td, color: p.targetGap > 0 ? '#dc2626' : '#16a34a', fontWeight: p.targetGap > 0 ? 600 : 400 }}>
-                  {p.targetQty != null ? (p.targetGap > 0 ? `-${p.targetGap}` : '0') : '—'}
-                </td>
-                <td style={td}>{p.contributionPct.toFixed(1)}%</td>
-                <td style={td}><ClassBadge cls={p.classification} /></td>
-              </tr>
-            ))}
+            {products.map((p, i) => {
+              const value = productValueMap[p.productCode];
+              return (
+                <tr key={p.productCode} style={{ background: i % 2 ? '#f8fafc' : '#fff' }}>
+                  <td style={td}><strong>{p.productCode}</strong><br /><span style={{ color: '#64748b', fontSize: 12 }}>{p.productName}</span></td>
+                  <td style={{ ...td, fontWeight: 700, color: '#3b82f6' }}>{p.allocatedCapacity}</td>
+                  <td style={{ ...td, color: '#64748b' }}>{p.standaloneCapacity}</td>
+                  <td style={{ ...td, color: p.gap > 0 ? '#dc2626' : '#16a34a' }}>
+                    {p.gap > 0 ? `-${p.gap}` : '0'}
+                  </td>
+                  <td style={{ ...td, color: '#64748b' }}>{p.targetQty != null ? p.targetQty : '—'}</td>
+                  <td style={{ ...td, color: p.targetGap > 0 ? '#dc2626' : '#16a34a', fontWeight: p.targetGap > 0 ? 600 : 400 }}>
+                    {p.targetQty != null ? (p.targetGap > 0 ? `-${p.targetGap}` : '0') : '—'}
+                  </td>
+                  <td style={td}>{value ? `${fmt(value.valueConsumed)} (${value.pctOfUsed.toFixed(1)}%)` : '—'}</td>
+                  <td style={td}>{p.contributionPct.toFixed(1)}%</td>
+                  <td style={td}><ClassBadge cls={p.classification} /></td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
         <p style={{ fontSize: 12, color: '#94a3b8', marginTop: 6 }}>

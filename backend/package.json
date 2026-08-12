@@ -4,6 +4,8 @@
   "description": "This folder contains the Node.js/Express backend for Inventory Planner. All API, data ingestion, and orchestration logic live here.",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
