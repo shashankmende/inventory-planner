@@ -88,10 +88,10 @@ export default function LandingPage() {
               </tbody>
             </table>
           </div>
-          <div style={noteStyle}>
+          {/* <div style={noteStyle}>
             Row 1: Motor — <strong>Manufacturing Critical</strong> (blocks both manufacturing &amp; dispatch). Needs 1 unit for PM125 and 2 for STSK.<br />
             Row 2: Box — <strong>Dispatch Critical</strong> (blocks dispatch only). Stock value provided directly instead of Buy Price.
-          </div>
+          </div> */}
         </div>
       </Section>
 
