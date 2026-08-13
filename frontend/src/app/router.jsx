@@ -13,7 +13,7 @@ const StockValue = lazy(() => import('../pages/StockValue'));
 const ObsoleteStock = lazy(() => import('../pages/ObsoleteStock'));
 
 function Loading() {
-  return <div style={{ padding: 24, color: '#64748b' }}>Loading…</div>;
+  return <div style={{ padding: 24, color: '#64748b', height: '100vh', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>Loading…</div>;
 }
 
 export default function AppRouter() {
